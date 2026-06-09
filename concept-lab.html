@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Concept Lab — Static Ad Mockups</title>
-<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Caveat:wght@700&family=Luckiest+Guy&family=Fredoka:wght@500;600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Caveat:wght@700&family=Luckiest+Guy&family=Fredoka:wght@500;600;700&family=Nunito:wght@400;700;800;900&family=DM+Serif+Display&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:#1d2025;color:#e7eaee;font-family:'Nunito',sans-serif;padding:28px 18px 60px;max-width:1000px;margin:0 auto}
@@ -66,21 +66,21 @@ let photoURL=null;
 
 const BRANDS={
   kinderkare:{name:'Kinder Kare',draft:false,rules:'✅ faces OK · bg biru tekstur · marker + aksen kuning · CTA pill merah',
-    bg:'radial-gradient(120% 90% at 30% 8%,#3fb3df,#1f9ed4 50%,#1689c2)',headFont:"'Permanent Marker',cursive",headColor:'#fff',headShadow:'2px 2px 0 #0e6b9c',accent:'#ffd23f',ctaBg:'#e63d2f',ctaColor:'#fff',ctaBorder:'2px solid #fff',doodles:['🍓','⚡','✓'],chipHtml:'<span style="color:#1689c2">KINDER</span> <span style="color:#e63d2f">KARE</span>',blockColor:'#1f9ed4',caseUpper:true},
-  everwood:{name:'Everwood',draft:false,rules:'✅ faces OK · bg lime ribbed · headline chunky 2-tone · CTA pill teal',
-    bg:'repeating-linear-gradient(90deg,#b5cf45 0 14px,#aac63e 14px 28px)',headFont:"'Luckiest Guy',cursive",headColor:'#fff',headShadow:'2.5px 2.5px 0 #2c6e4f',accent:'#ffd23f',ctaBg:'#1d9e8f',ctaColor:'#fff',ctaBorder:'none',doodles:['✦','🌾','☺'],chipHtml:'<span style="color:#2c6e4f">EVERWOOD</span>',blockColor:'#aac63e',caseUpper:true},
-  kiros:{name:"Kiro's",draft:false,rules:'✅ faces OK · ungu vibrant playful · tema Peace of Mind / School Readiness',
-    bg:'radial-gradient(120% 90% at 30% 10%,#9b5de5,#7c3aed 55%,#6024c9)',headFont:"'Fredoka',sans-serif",headColor:'#fff',headShadow:'2px 2px 0 #4c1d95',accent:'#fbbf24',ctaBg:'#fff',ctaColor:'#6024c9',ctaBorder:'none',doodles:['✨','💜','☁️'],chipHtml:'<span style="color:#6024c9">KIRO\'S</span>',blockColor:'#7c3aed',caseUpper:false},
+    bg:'radial-gradient(120% 90% at 30% 8%,#3fb3df,#1f9ed4 50%,#1689c2)',headFont:"'Permanent Marker',cursive",headColor:'#fff',headShadow:'2px 2px 0 #0e6b9c',accent:'#ffd23f',ctaBg:'#e63d2f',ctaColor:'#fff',ctaBorder:'2px solid #fff',doodles:['🍓','⚡','✓'],chipHtml:'<span style="color:#1689c2">KINDER</span> <span style="color:#e63d2f">KARE</span>',blockColor:'#1f9ed4',caseUpper:true,sig:['colorblock','diagonal']},
+  everwood:{name:'Everwood',draft:false,rules:'✅ faces OK · bg lime ribbed · headline chunky 2-tone · CTA pill teal · polaroid hero',
+    bg:'repeating-linear-gradient(90deg,#b5cf45 0 14px,#aac63e 14px 28px)',headFont:"'Luckiest Guy',cursive",headColor:'#fff',headShadow:'2.5px 2.5px 0 #2c6e4f',accent:'#ffd23f',ctaBg:'#1d9e8f',ctaColor:'#fff',ctaBorder:'none',doodles:['✦','🌾','☺'],chipHtml:'<span style="color:#2c6e4f">EVERWOOD</span>',blockColor:'#aac63e',caseUpper:true,sig:['polaroid','torn']},
+  kiros:{name:"Kiro's",draft:false,rules:'✅ faces OK · ⭐SIG: foto full-bleed + headline BANNER miring (magenta+biru) + gradient ungu bawah + CTA pill kecil · dari Static 11 asli',
+    bg:'radial-gradient(120% 90% at 30% 10%,#9b5de5,#7c3aed 55%,#6024c9)',headFont:"'Fredoka',sans-serif",headColor:'#fff',headShadow:'2px 2px 0 #4c1d95',accent:'#fbbf24',ctaBg:'#2f7fd4',ctaColor:'#fff',ctaBorder:'2px solid #fff',doodles:['✨','💜','☁️'],chipHtml:'<span style="color:#6024c9">KIRO\'S</span>',blockColor:'#7c3aed',caseUpper:false,banner1:'#d6308f',banner2:'#2f7fd4',sig:['banners','fullbleed']},
   ingleburn:{name:'Ingleburn',draft:false,rules:'⛔ NO AI (foto real only) · ❌ no kids faces · tone PREMIUM + facility showcase',
-    bg:'linear-gradient(165deg,#f5f1e8,#e8e0d0)',headFont:"'Fredoka',sans-serif",headColor:'#2d3b2f',headShadow:'none',accent:'#b08d3e',ctaBg:'#2d3b2f',ctaColor:'#f5f1e8',ctaBorder:'none',doodles:['✦','·','✦'],chipHtml:'<span style="color:#2d3b2f">INGLEBURN <span style="color:#b08d3e">MONTESSORI</span></span>',blockColor:'#3c4f3e',caseUpper:false},
-  littlesmarties:{name:'Little Smarties',draft:true,rules:'❌ no kids faces · ❌ NO voiceover di video · foto real dari FB (per Max 5 Jun)',
-    bg:'radial-gradient(120% 90% at 30% 8%,#ff8a5c,#f4623a 55%,#e0481f)',headFont:"'Fredoka',sans-serif",headColor:'#fff',headShadow:'2px 2px 0 #9c2e0e',accent:'#ffe14d',ctaBg:'#1d6fd1',ctaColor:'#fff',ctaBorder:'2px solid #fff',doodles:['🧠','⭐','✓'],chipHtml:'<span style="color:#e0481f">LITTLE</span> <span style="color:#1d6fd1">SMARTIES</span>',blockColor:'#f4623a',caseUpper:true},
-  littlegems:{name:'Little Gems',draft:true,rules:'CTA = DRIVE CALLS (0424 165 122) · VO dari klien sendiri',
-    bg:'radial-gradient(120% 90% at 30% 8%,#3ec6b8,#199b90 55%,#0d7d74)',headFont:"'Fredoka',sans-serif",headColor:'#fff',headShadow:'2px 2px 0 #04443f',accent:'#ffd23f',ctaBg:'#7c3aed',ctaColor:'#fff',ctaBorder:'2px solid #fff',doodles:['💎','✨','✓'],chipHtml:'<span style="color:#0d7d74">LITTLE</span> <span style="color:#7c3aed">GEMS</span>',blockColor:'#199b90',caseUpper:true},
-  wonderworld:{name:'WonderWorld',draft:true,rules:'(belum ada rule khusus — cek Client Hub)',
-    bg:'radial-gradient(120% 90% at 30% 8%,#5aa9e6,#2f7fd4 55%,#1b62b5)',headFont:"'Fredoka',sans-serif",headColor:'#fff',headShadow:'2px 2px 0 #123c70',accent:'#ffd23f',ctaBg:'#ff7a3d',ctaColor:'#fff',ctaBorder:'2px solid #fff',doodles:['🌍','🎈','✦'],chipHtml:'<span style="color:#1b62b5">WONDER<span style="color:#ff7a3d">WORLD</span></span>',blockColor:'#2f7fd4',caseUpper:true},
-  kreationkidz:{name:'Kreation Kidz',draft:true,rules:'(belum ada rule khusus — cek Client Hub)',
-    bg:'radial-gradient(120% 90% at 30% 8%,#f973ab,#ec4899 55%,#d62f82)',headFont:"'Fredoka',sans-serif",headColor:'#fff',headShadow:'2px 2px 0 #8c1a52',accent:'#ffe14d',ctaBg:'#2563eb',ctaColor:'#fff',ctaBorder:'2px solid #fff',doodles:['🎨','✂️','⭐'],chipHtml:'<span style="color:#d62f82">KREATION</span> <span style="color:#2563eb">KIDZ</span>',blockColor:'#ec4899',caseUpper:true}
+    bg:'linear-gradient(165deg,#f5f1e8,#e8e0d0)',headFont:"'DM Serif Display',serif",headColor:'#2d3b2f',headShadow:'none',accent:'#b08d3e',ctaBg:'#2d3b2f',ctaColor:'#f5f1e8',ctaBorder:'none',doodles:['✦','·','✦'],chipHtml:'<span style="color:#2d3b2f">INGLEBURN <span style="color:#b08d3e">MONTESSORI</span></span>',blockColor:'#3c4f3e',caseUpper:false,sig:['minimal','arch']},
+  littlesmarties:{name:'Little Smarties',draft:false,rules:'❌ no faces (tangan/fasilitas) · ❌ NO VO · foto real FB · ⭐SIG: warm cream, serif elegan, aksen amber, mini-CTA emas · dari Static 10 asli',
+    bg:'linear-gradient(165deg,#f3ead9,#e2d2b3)',headFont:"'DM Serif Display',serif",headColor:'#fff',headShadow:'0 2px 12px rgba(0,0,0,.45)',accent:'#e8b04b',ctaBg:'#c98a2e',ctaColor:'#fff',ctaBorder:'none',doodles:['🍓','🍃','✦'],chipHtml:'<span style="color:#8a5a1d">LITTLE</span> <span style="color:#c98a2e">SMARTIES</span>',blockColor:'#caa05a',caseUpper:false,sig:['minimal','arch']},
+  littlegems:{name:'Little Gems',draft:true,rules:'⚠ dipegang Binh (bukan Bolo) · CTA = DRIVE CALLS (0424 165 122) · VO dari klien sendiri',
+    bg:'radial-gradient(120% 90% at 30% 8%,#3ec6b8,#199b90 55%,#0d7d74)',headFont:"'Fredoka',sans-serif",headColor:'#fff',headShadow:'2px 2px 0 #04443f',accent:'#ffd23f',ctaBg:'#7c3aed',ctaColor:'#fff',ctaBorder:'2px solid #fff',doodles:['💎','✨','✓'],chipHtml:'<span style="color:#0d7d74">LITTLE</span> <span style="color:#7c3aed">GEMS</span>',blockColor:'#199b90',caseUpper:true,sig:['fullbleed','sticker']},
+  wonderworld:{name:'WonderWorld',draft:false,rules:'✅ faces keliatan OK di static · ⭐SIG: bubble font lilac outline putih, headline TOP, CTA pill kuning kecil, gem/sparkle · dari Static 15 asli',
+    bg:'linear-gradient(165deg,#bfe3f5,#8ec9ec)',headFont:"'Baloo 2',cursive",headColor:'#fff',headShadow:'2.5px 2.5px 0 rgba(50,100,160,.45)',accent:'#b89ae8',ctaBg:'#f5c542',ctaColor:'#1d3557',ctaBorder:'2px solid #fff',doodles:['💎','✨','⚡'],chipHtml:'<span style="color:#1b62b5">WONDER<span style="color:#ff7a3d">WORLD</span></span>',blockColor:'#8ec9ec',caseUpper:false,sig:['topbubble','fullbleed']},
+  kreationkidz:{name:'Kreation Kidz',draft:false,rules:'⚠ dipegang Binh (bukan Bolo) · wajah SENSITIF (pernah diminta blur) · ⭐SIG: scrapbook botanical cream+sage+coral, polaroid miring, badge headline, CTA navy · dari static Binh 8 Jun',
+    bg:'linear-gradient(160deg,#f6efe2,#ece1cb)',headFont:"'Fredoka',sans-serif",headColor:'#3a4d8f',headShadow:'none',accent:'#e2697f',ctaBg:'#2c3e6b',ctaColor:'#fff',ctaBorder:'none',doodles:['🌿','🌸','🦋'],chipHtml:'<span style="color:#e2697f">KREATION</span> <span style="color:#3a4d8f">KIDZ</span>',blockColor:'#9eb88a',caseUpper:true,sig:['botanical','polaroid']}
 };
 
 const ANGLES={
@@ -122,7 +122,7 @@ const ANGLES={
     cta:['Become part of our community','Book a tour','Enquire today']}
 };
 
-const LAYOUTS=['fullbleed','arch','diagonal','colorblock','sticker','torn','polaroid'];
+const LAYOUTS=['fullbleed','arch','diagonal','colorblock','sticker','torn','polaroid','banners','topbubble','minimal','botanical'];
 let curBrand='kinderkare',curAngle='tour',slots=[{},{},{}];
 
 function accentify(h,t){
@@ -150,7 +150,31 @@ const RENDER={
   colorblock:(t,c)=>'<div style="position:absolute;inset:0;background:'+t.bg+'"></div><div style="position:absolute;left:0;right:0;bottom:0;height:52%;overflow:hidden;z-index:3"><div class="ph" style="'+phStyle()+'"></div></div>'+chipHtml(t)+doodles(t,'top:40%;left:14px','top:14px;left:16px')+'<div style="position:absolute;left:18px;right:18px;top:46px;z-index:5">'+headHtml(t,c.h,24)+subHtml(t,c.s)+'</div>'+ctaHtml(t,c.cta),
   sticker:(t,c)=>'<div style="position:absolute;inset:0;background:'+t.bg+'"></div>'+chipHtml(t)+doodles(t,'top:20px;left:16px','bottom:120px;left:18px')+'<span class="doodle" style="top:60px;right:20px">'+(t.doodles[2]||'✦')+'</span><div style="position:absolute;top:84px;left:50%;transform:translateX(-50%) rotate(-3deg);width:190px;height:190px;border-radius:50%;overflow:hidden;border:6px solid #fff;box-shadow:0 10px 22px #0005;z-index:4"><div class="ph" style="'+phStyle()+'"></div></div><div style="position:absolute;left:16px;right:16px;top:296px;text-align:center;z-index:5">'+headHtml(t,c.h,22)+subHtml(t,c.s)+'</div>'+ctaHtml(t,c.cta),
   torn:(t,c)=>'<div style="position:absolute;inset:0;background:'+t.bg+'"></div>'+chipHtml(t)+'<div style="position:absolute;left:18px;right:18px;top:44px;z-index:5">'+headHtml(t,c.h,23)+'</div><div style="position:absolute;left:0;right:0;top:170px;height:175px;overflow:hidden;clip-path:polygon(0 6%,7% 0,17% 5%,28% 1%,40% 6%,52% 1%,63% 5%,75% 0,86% 5%,95% 1%,100% 6%,100% 94%,93% 100%,82% 95%,70% 99%,58% 94%,47% 99%,35% 95%,24% 100%,12% 95%,0 99%);z-index:4"><div class="ph" style="'+phStyle()+'"></div></div>'+doodles(t,'top:150px;right:14px','bottom:96px;left:16px')+'<div style="position:absolute;left:18px;right:18px;top:360px;z-index:5">'+subHtml(t,c.s)+'</div>'+ctaHtml(t,c.cta),
-  polaroid:(t,c)=>'<div style="position:absolute;inset:0;background:'+t.bg+'"></div>'+chipHtml(t)+doodles(t,'top:18px;left:16px','bottom:100px;right:14px')+'<div style="position:absolute;top:64px;left:50%;transform:translateX(-50%) rotate(-2.5deg);width:200px;background:#fff;padding:9px 9px 30px;box-shadow:0 10px 22px #0005;z-index:4"><div style="height:200px;overflow:hidden"><div class="ph" style="position:relative;height:100%;'+phStyle()+'"></div></div></div><div style="position:absolute;left:16px;right:16px;top:330px;text-align:center;z-index:5">'+headHtml(t,c.h,21)+subHtml(t,c.s)+'</div>'+ctaHtml(t,c.cta)
+  polaroid:(t,c)=>'<div style="position:absolute;inset:0;background:'+t.bg+'"></div>'+chipHtml(t)+doodles(t,'top:18px;left:16px','bottom:100px;right:14px')+'<div style="position:absolute;top:64px;left:50%;transform:translateX(-50%) rotate(-2.5deg);width:200px;background:#fff;padding:9px 9px 30px;box-shadow:0 10px 22px #0005;z-index:4"><div style="height:200px;overflow:hidden"><div class="ph" style="position:relative;height:100%;'+phStyle()+'"></div></div></div><div style="position:absolute;left:16px;right:16px;top:330px;text-align:center;z-index:5">'+headHtml(t,c.h,21)+subHtml(t,c.s)+'</div>'+ctaHtml(t,c.cta),
+  banners:(t,c)=>{
+    const ws=c.h.split(' '),mid=Math.ceil(ws.length/2);
+    const l1=ws.slice(0,mid).join(' '),l2=ws.slice(mid).join(' ');
+    const b1=t.banner1||t.blockColor,b2=t.banner2||t.ctaBg;
+    return '<div class="ph" style="'+phStyle()+'"></div><div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.18) 0%,transparent 28%,transparent 55%,'+t.blockColor+'cc 100%);z-index:2"></div>'+chipHtml(t)
+    +'<div style="position:absolute;top:36px;left:16px;z-index:5"><div style="display:inline-block;background:'+b1+';color:#fff;font-weight:900;font-size:17px;padding:6px 14px;transform:rotate(-4deg);box-shadow:0 4px 10px #0004">'+l1+'</div><br><div style="display:inline-block;background:'+b2+';color:#fff;font-weight:900;font-size:17px;padding:6px 14px;transform:rotate(-2deg);margin:6px 0 0 14px;box-shadow:0 4px 10px #0004">'+l2+'</div></div>'
+    +'<div style="position:absolute;left:16px;bottom:26px;max-width:140px;font-size:10.5px;font-weight:800;color:#fff;line-height:1.3;z-index:5;opacity:.95">'+c.s+'</div>'
+    +'<div style="position:absolute;right:12px;bottom:24px;background:'+t.ctaBg+';color:'+t.ctaColor+';border:'+t.ctaBorder+';font-weight:900;font-size:10.5px;padding:7px 13px;border-radius:18px;z-index:6">▶ '+c.cta+'</div>'},
+  topbubble:(t,c)=>{
+    const ws=c.h.split(' ');let idx=0,len=0;ws.forEach((w,i)=>{if(w.length>len){len=w.length;idx=i}});
+    const pre=ws.filter((w,i)=>i!==idx).join(' '),big=ws[idx];
+    return '<div class="ph" style="'+phStyle()+'"></div><div style="position:absolute;inset:0;background:linear-gradient(180deg,'+t.blockColor+'b8 0%,transparent 38%);z-index:2"></div>'+chipHtml(t)
+    +'<div style="position:absolute;top:34px;left:14px;right:14px;text-align:center;z-index:5"><div style="font-family:'+t.headFont+';font-weight:800;color:#fff;font-size:19px;text-shadow:'+t.headShadow+'">'+pre+'</div><div style="font-family:'+t.headFont+';font-weight:800;color:'+t.accent+';font-size:34px;line-height:1;text-shadow:-2px -2px 0 #fff,2px -2px 0 #fff,-2px 2px 0 #fff,2px 2px 0 #fff,0 6px 14px rgba(0,0,0,.25)">'+big+'</div><div style="font-size:10.5px;font-weight:800;color:#fff;margin-top:5px;text-shadow:0 1px 6px rgba(0,0,0,.5)">'+c.s+'</div></div>'
+    +doodles(t,'top:30px;right:18px','top:120px;left:16px')
+    +'<div style="position:absolute;left:50%;transform:translateX(-50%);bottom:26px;background:'+t.ctaBg+';color:'+t.ctaColor+';border:'+t.ctaBorder+';font-weight:900;font-size:11px;padding:8px 16px;border-radius:18px;z-index:6">'+c.cta.toUpperCase()+'</div>'},
+  minimal:(t,c)=>'<div class="ph" style="'+phStyle()+'"></div><div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 42%,rgba(20,12,4,.78));z-index:2"></div>'+chipHtml(t)
+    +'<div style="position:absolute;left:20px;right:20px;bottom:64px;text-align:center;z-index:5"><div style="display:inline-block;background:'+t.ctaBg+';color:'+t.ctaColor+';font-weight:900;font-size:9.5px;letter-spacing:.08em;padding:5px 13px;border-radius:14px;margin-bottom:11px">'+c.cta.toUpperCase()+'</div>'+headHtml(t,c.h,25)+'<div style="font-size:11px;font-weight:700;color:#f2e8d8;margin-top:7px;opacity:.92">'+c.s+'</div></div>'
+    +doodles(t,'bottom:24px;left:18px','bottom:26px;right:18px'),
+  botanical:(t,c)=>'<div style="position:absolute;inset:0;background:'+t.bg+'"></div>'
+    +'<span style="position:absolute;top:-8px;left:-10px;font-size:54px;opacity:.55;transform:rotate(20deg);z-index:1">🌿</span><span style="position:absolute;bottom:48px;right:-8px;font-size:48px;opacity:.55;transform:rotate(-15deg);z-index:1">🌸</span><span style="position:absolute;bottom:120px;left:-6px;font-size:40px;opacity:.5;z-index:1">🌼</span>'+chipHtml(t)
+    +'<div style="position:absolute;top:46px;left:50%;transform:translateX(-50%) rotate(-2.5deg);width:186px;background:#fff;padding:8px 8px 22px;box-shadow:0 8px 18px #0003;z-index:3"><div style="height:150px;overflow:hidden"><div class="ph" style="position:relative;height:100%;'+phStyle()+'"></div></div></div>'
+    +'<div style="position:absolute;top:248px;left:50%;transform:translateX(-50%) rotate(1.5deg);background:#fff;border-radius:16px;padding:13px 18px;box-shadow:0 8px 18px #0002;text-align:center;z-index:4;width:200px"><div style="font-family:'+t.headFont+';font-weight:700;font-size:19px;line-height:1.15;color:'+t.headColor+'">'+accentify(t.caseUpper?c.h.toUpperCase():c.h,t)+'</div></div>'
+    +'<div style="position:absolute;left:24px;right:24px;top:352px;text-align:center;font-size:10.5px;font-weight:700;color:#6b6b5a;z-index:4">'+c.s+'</div>'
+    +'<div style="position:absolute;right:14px;bottom:22px;background:'+t.ctaBg+';color:'+t.ctaColor+';font-weight:900;font-size:10.5px;padding:8px 15px;border-radius:18px;z-index:6">📞 '+c.cta.toUpperCase()+'</div>'
 };
 
 function pick(arr,not){let v;do{v=arr[Math.floor(Math.random()*arr.length)]}while(arr.length>1&&v===not);return v}
@@ -158,7 +182,14 @@ function pick(arr,not){let v;do{v=arr[Math.floor(Math.random()*arr.length)]}whil
 function rollSlot(i){
   const t=BRANDS[curBrand],ang=ANGLES[curAngle];
   const others=slots.filter((s,j)=>j!==i);
-  let layout;do{layout=pick(LAYOUTS)}while(others.some(o=>o.layout===layout));
+  const sig=t.sig||[];
+  let layout,tries=0;
+  do{
+    if(i===0&&sig.length&&tries<3)layout=sig[0];
+    else if(Math.random()<0.5&&sig.length)layout=pick(sig);
+    else layout=pick(LAYOUTS);
+    tries++;
+  }while(others.some(o=>o.layout===layout)&&tries<20);
   const copy=pick(ang.copy,slots[i].copy);
   slots[i]={layout,copy,cta:pick(ang.cta)};
 }
@@ -188,7 +219,7 @@ $('photo').addEventListener('change',e=>{
 
 $('brands').innerHTML=Object.keys(BRANDS).map(k=>'<span class="chip'+(BRANDS[k].draft?' draft':'')+'" id="b_'+k+'" onclick="setBrand(\''+k+'\')">'+BRANDS[k].name+'</span>').join('');
 $('angles').innerHTML=Object.keys(ANGLES).map(k=>'<span class="chip" id="a_'+k+'" onclick="setAngle(\''+k+'\')">'+ANGLES[k].label+'</span>').join('');
-function setBrand(k){curBrand=k;document.querySelectorAll('[id^=b_]').forEach(e=>e.classList.toggle('on',e.id==='b_'+k));render()}
+function setBrand(k){curBrand=k;document.querySelectorAll('[id^=b_]').forEach(e=>e.classList.toggle('on',e.id==='b_'+k));shuffleAll()}
 function setAngle(k){curAngle=k;document.querySelectorAll('[id^=a_]').forEach(e=>e.classList.toggle('on',e.id==='a_'+k));shuffleAll()}
 setBrand('kinderkare');setAngle('tour');
 </script>
