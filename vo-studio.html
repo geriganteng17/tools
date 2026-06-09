@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VO Studio — Gemini TTS</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#1d2025;color:#e7eaee;font-family:'Nunito',sans-serif;padding:28px 18px 60px;max-width:860px;margin:0 auto}
+  h1{font-size:22px;font-weight:900;letter-spacing:.02em}
+  h1 span{color:#ffd23f}
+  .sub{color:#9aa3ad;font-size:13px;margin:4px 0 22px}
+  label{display:block;font-size:12px;font-weight:800;color:#9aa3ad;text-transform:uppercase;letter-spacing:.06em;margin:16px 0 6px}
+  textarea,input,select{width:100%;background:#272b32;border:1.5px solid #3a4049;border-radius:10px;color:#e7eaee;font-family:'Nunito',sans-serif;font-size:14.5px;padding:11px 13px;outline:none}
+  textarea:focus,input:focus,select:focus{border-color:#4f8ff7}
+  textarea{min-height:150px;line-height:1.55;resize:vertical}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .row>div{flex:1;min-width:200px}
+  .hint{font-size:12px;color:#7c8590;margin-top:5px;line-height:1.5}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:#e63d2f;color:#fff;border:none;border-radius:24px;font-family:'Nunito',sans-serif;font-weight:900;font-size:15px;padding:12px 28px;cursor:pointer;margin-top:20px}
+  .btn:hover{background:#f04a3c}
+  .btn:disabled{background:#5a5f66;cursor:wait}
+  .btn.sec{background:#272b32;border:1.5px solid #3a4049;font-size:13px;padding:9px 18px}
+  .out{margin-top:22px;background:#272b32;border:1.5px solid #3a4049;border-radius:12px;padding:16px;display:none}
+  .out.show{display:block}
+  audio{width:100%;margin:10px 0 12px}
+  .err{margin-top:16px;background:#3a2326;border:1.5px solid #a3403c;border-radius:10px;padding:12px 14px;font-size:13px;color:#f3b8b3;display:none;white-space:pre-wrap;line-height:1.5}
+  .meta{font-size:12.5px;color:#9aa3ad}
+  .word{color:#ffd23f;font-weight:800}
+  .keyrow{display:flex;gap:8px;align-items:center}
+  .keyrow input{flex:1}
+  .ok{color:#7ddf9a;font-size:12px;font-weight:800;display:none}
+</style>
+</head>
+<body>
+  <h1>🎙️ VO <span>STUDIO</span></h1>
+  <p class="sub">Generate voice-over langsung via Gemini TTS API — gak tergantung UI AI Studio. Audio keluar sebagai WAV siap import ke AE/CapCut.</p>
+
+  <label>Gemini API key <span style="text-transform:none">(disimpen lokal di browser lo doang)</span></label>
+  <div class="keyrow">
+    <input type="password" id="key" placeholder="AIza...">
+    <button class="btn sec" onclick="saveKey()">Save</button>
+    <span class="ok" id="keyok">✓ saved</span>
+  </div>
+  <p class="hint">Ambil di <b>aistudio.google.com/apikey</b> (sama kayak key KaloriCerdas). Kalau kena 429 = quota habis — tunggu 24 jam atau bikin GCP project baru.</p>
+
+  <label>Style / accent instruction</label>
+  <input id="style" value="Read this in a warm, friendly Australian accent. Premium commercial pacing — polished, persuasive, inviting. Follow the [emotion] cues in brackets.">
+
+  <label>Script VO</label>
+  <textarea id="script">[warm] Choosing a centre feels huge — but it's simple when you know what to look for. [bright] First, care and safety — clean, tidy spaces, and enough educators for every child. [crisp] Then the daily essentials — fresh meals made on-site, and a calm, steady routine. [warm] And how they learn and play — rich materials, and a safe, engaging playground. [confident] Now you know what to look for. Tour with confidence — book a visit today.</textarea>
+  <p class="hint"><span class="word" id="wc">0 kata</span> · target: ~52–56 kata = 25 dtk · ~65–70 kata = 30 dtk (pace TTS lambat)</p>
+
+  <div class="row">
+    <div>
+      <label>Voice</label>
+      <select id="voice">
+        <option value="Callirrhoe" selected>Callirrhoe — warm female (pilihan Bolo)</option>
+        <option value="Kore">Kore — firm female</option>
+        <option value="Leda">Leda — youthful female</option>
+        <option value="Aoede">Aoede — breezy female</option>
+        <option value="Zephyr">Zephyr — bright female</option>
+        <option value="Sulafat">Sulafat — warm</option>
+        <option value="Achird">Achird — friendly</option>
+        <option value="Orus">Orus — firm male</option>
+        <option value="Puck">Puck — upbeat male</option>
+        <option value="Charon">Charon — informative male</option>
+      </select>
+    </div>
+    <div>
+      <label>Model</label>
+      <select id="model">
+        <option value="gemini-2.5-flash-preview-tts" selected>2.5 Flash TTS (stabil, murah)</option>
+        <option value="gemini-2.5-pro-preview-tts">2.5 Pro TTS (kualitas max)</option>
+        <option value="gemini-3.1-flash-tts-preview">3.1 Flash TTS (preview baru)</option>
+      </select>
+    </div>
+  </div>
+
+  <button class="btn" id="go" onclick="generate()">▶ Generate VO</button>
+  <div class="err" id="err"></div>
+
+  <div class="out" id="out">
+    <label style="margin-top:0">Hasil</label>
+    <audio id="player" controls></audio>
+    <div class="row">
+      <button class="btn sec" onclick="dl()">⬇ Download WAV</button>
+      <span class="meta" id="meta"></span>
+    </div>
+  </div>
+
+<script>
+const $=id=>document.getElementById(id);
+let lastBlob=null,lastName='vo';
+$('key').value=localStorage.getItem('gemini_key')||'';
+function saveKey(){localStorage.setItem('gemini_key',$('key').value.trim());$('keyok').style.display='inline';setTimeout(()=>$('keyok').style.display='none',1500)}
+function countWords(){const t=$('script').value.replace(/\[[^\]]*\]/g,' ').replace(/<[^>]*>/g,' ');const n=(t.match(/[A-Za-z0-9''-]+/g)||[]).length;$('wc').textContent=n+' kata (~'+Math.round(n/2.2)+' dtk)';}
+$('script').addEventListener('input',countWords);countWords();
+
+function pcmToWav(pcmBytes,rate){
+  const len=pcmBytes.length,buf=new ArrayBuffer(44+len),v=new DataView(buf);
+  const ws=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+  ws(0,'RIFF');v.setUint32(4,36+len,true);ws(8,'WAVE');ws(12,'fmt ');
+  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,rate,true);v.setUint32(28,rate*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);
+  ws(36,'data');v.setUint32(40,len,true);
+  new Uint8Array(buf,44).set(pcmBytes);
+  return new Blob([buf],{type:'audio/wav'});
+}
+
+async function generate(){
+  const key=($('key').value||'').trim();
+  $('err').style.display='none';
+  if(!key){$('err').textContent='API key kosong — paste dulu di atas, klik Save.';$('err').style.display='block';return}
+  localStorage.setItem('gemini_key',key);
+  const model=$('model').value,voice=$('voice').value;
+  const text=($('style').value.trim()? $('style').value.trim()+'\n\n':'')+$('script').value.trim();
+  $('go').disabled=true;$('go').textContent='⏳ Generating…';
+  try{
+    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+encodeURIComponent(key),{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        contents:[{parts:[{text:text}]}],
+        generationConfig:{responseModalities:['AUDIO'],speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName:voice}}}}
+      })
+    });
+    const j=await r.json();
+    if(!r.ok){throw new Error((j.error&&j.error.message)||('HTTP '+r.status))}
+    const part=(((j.candidates||[])[0]||{}).content||{}).parts?.find(p=>p.inlineData);
+    if(!part)throw new Error('Respons gak ada audio. Coba model lain di dropdown.\n'+JSON.stringify(j).slice(0,300));
+    const mime=part.inlineData.mimeType||'';
+    const rate=parseInt((mime.match(/rate=(\d+)/)||[])[1]||'24000',10);
+    const bin=atob(part.inlineData.data);
+    const bytes=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+    lastBlob=(mime.indexOf('wav')>-1)?new Blob([bytes],{type:'audio/wav'}):pcmToWav(bytes,rate);
+    lastName='VO_'+voice+'_'+new Date().toISOString().slice(0,10);
+    const url=URL.createObjectURL(lastBlob);
+    $('player').src=url;$('out').classList.add('show');
+    $('meta').textContent=voice+' · '+model+' · '+rate+' Hz';
+    $('player').onloadedmetadata=()=>{$('meta').textContent=voice+' · '+model+' · '+$('player').duration.toFixed(1)+' dtk'};
+    $('player').play().catch(()=>{});
+  }catch(e){
+    let m=String(e.message||e);
+    if(m.indexOf('429')>-1||/quota|RESOURCE_EXHAUSTED/i.test(m))m+='\n\n→ 429 = quota habis (bukan bug). Tunggu 24 jam ATAU bikin GCP project baru + key baru.';
+    if(/not found|NOT_FOUND/i.test(m))m+='\n\n→ Model gak tersedia di key lo — ganti model di dropdown.';
+    $('err').textContent=m;$('err').style.display='block';
+  }finally{
+    $('go').disabled=false;$('go').textContent='▶ Generate VO';
+  }
+}
+function dl(){
+  if(!lastBlob)return;
+  const a=document.createElement('a');a.href=URL.createObjectURL(lastBlob);a.download=lastName+'.wav';a.click();
+}
+</script>
+</body>
+</html>
