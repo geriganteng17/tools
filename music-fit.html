@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music Fit — Remix Duration Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#1d2025;color:#e7eaee;font-family:'Nunito',sans-serif;padding:28px 18px 60px;max-width:860px;margin:0 auto}
+  h1{font-size:22px;font-weight:900;letter-spacing:.02em}
+  h1 span{color:#ffd23f}
+  .sub{color:#9aa3ad;font-size:13px;margin:4px 0 22px;line-height:1.5}
+  label{display:block;font-size:12px;font-weight:800;color:#9aa3ad;text-transform:uppercase;letter-spacing:.06em;margin:16px 0 6px}
+  input,select{background:#272b32;border:1.5px solid #3a4049;border-radius:10px;color:#e7eaee;font-family:'Nunito',sans-serif;font-size:14.5px;padding:11px 13px;outline:none}
+  input:focus{border-color:#4f8ff7}
+  .drop{border:2px dashed #3a4049;border-radius:14px;padding:34px 20px;text-align:center;color:#9aa3ad;font-size:14px;cursor:pointer;transition:border-color .15s}
+  .drop:hover,.drop.on{border-color:#4f8ff7;color:#cdd6e0}
+  .drop b{color:#e7eaee}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+  .row>div{flex:1;min-width:160px}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:#e63d2f;color:#fff;border:none;border-radius:24px;font-family:'Nunito',sans-serif;font-weight:900;font-size:15px;padding:12px 28px;cursor:pointer;margin-top:20px}
+  .btn:hover{background:#f04a3c}
+  .btn:disabled{background:#5a5f66;cursor:wait}
+  .btn.sec{background:#272b32;border:1.5px solid #3a4049;font-size:13px;padding:9px 18px}
+  canvas{width:100%;height:90px;background:#272b32;border:1.5px solid #3a4049;border-radius:10px;margin-top:14px;display:none}
+  .info{font-size:13px;color:#9aa3ad;margin-top:8px;display:none}
+  .info b{color:#ffd23f}
+  .out{margin-top:22px;background:#272b32;border:1.5px solid #3a4049;border-radius:12px;padding:16px;display:none}
+  audio{width:100%;margin:10px 0 12px}
+  .err{margin-top:16px;background:#3a2326;border:1.5px solid #a3403c;border-radius:10px;padding:12px 14px;font-size:13px;color:#f3b8b3;display:none;white-space:pre-wrap;line-height:1.5}
+  .meta{font-size:12.5px;color:#9aa3ad}
+  .chk{display:flex;align-items:center;gap:8px;font-size:13.5px;color:#cdd6e0;margin-top:16px}
+  .chk input{width:auto;accent-color:#e63d2f}
+</style>
+</head>
+<body>
+  <h1>🎵 MUSIC <span>FIT</span></h1>
+  <p class="sub">Remix ala Premiere Pro — pas-in durasi musik ke target (mis. reel 28 dtk) tanpa ngerusak beat. Deteksi beat → cari titik potong yang mirip secara musikal → crossfade halus. Paling jago di musik upbeat/loop-y (bed UGC); lagu kompleks hasilnya bisa kurang mulus.</p>
+
+  <div class="drop" id="drop" onclick="document.getElementById('file').click()">
+    🎧 <b>Drop file musik di sini</b> atau klik buat pilih<br><span style="font-size:12px">MP3 / WAV / M4A</span>
+  </div>
+  <input type="file" id="file" accept="audio/*" style="display:none">
+  <canvas id="wave" width="1600" height="180"></canvas>
+  <p class="info" id="info"></p>
+
+  <div class="row">
+    <div>
+      <label>Target durasi (detik)</label>
+      <input type="number" id="target" value="28" min="5" step="0.5" style="width:100%">
+    </div>
+    <div>
+      <label>Crossfade (detik)</label>
+      <select id="xfade" style="width:100%">
+        <option value="0.5">0.5 — tight</option>
+        <option value="1" selected>1.0 — natural</option>
+        <option value="2">2.0 — smooth blend</option>
+      </select>
+    </div>
+  </div>
+  <div class="chk"><input type="checkbox" id="fade" checked> <span>Fade-out di ujung (1.5 dtk) — buat ending ad</span></div>
+
+  <button class="btn" id="go" onclick="run()" disabled>✂ Fit duration</button>
+  <div class="err" id="err"></div>
+
+  <div class="out" id="out">
+    <label style="margin-top:0">Hasil</label>
+    <audio id="player" controls></audio>
+    <div class="row" style="align-items:center">
+      <button class="btn sec" onclick="dl()">⬇ Download WAV</button>
+      <span class="meta" id="meta"></span>
+    </div>
+  </div>
+
+<script>
+const $=id=>document.getElementById(id);
+let srcBuf=null,lastBlob=null,lastName='music-fit',cutInfo=null,playerUrl=null;
+
+$('file').addEventListener('change',e=>{if(e.target.files[0]){loadFile(e.target.files[0]);e.target.value=''}});
+const dz=$('drop');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('on')});
+dz.addEventListener('dragleave',()=>dz.classList.remove('on'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('on');if(e.dataTransfer.files[0])loadFile(e.dataTransfer.files[0])});
+
+async function loadFile(f){
+  err('');$('go').disabled=true;
+  try{
+    const ab=await f.arrayBuffer();
+    const ac=new (window.AudioContext||window.webkitAudioContext)();
+    srcBuf=await ac.decodeAudioData(ab);
+    ac.close();
+    lastName=f.name.replace(/\.[^.]+$/,'')+'_fit';
+    lastBlob=null;$('out').style.display='none';
+    const an=analyze(srcBuf);
+    srcBuf._an=an;
+    $('info').style.display='block';
+    $('info').innerHTML='Durasi <b>'+srcBuf.duration.toFixed(1)+' dtk</b> · tempo ± <b>'+Math.round(an.bpm)+' BPM</b> · '+srcBuf.numberOfChannels+' ch · '+srcBuf.sampleRate+' Hz';
+    drawWave(an.env,null);
+  }catch(e2){err('Gagal baca file: '+(e2.message||e2))}
+  finally{$('go').disabled=!srcBuf}
+}
+
+function analyze(buf){
+  const ch=buf.getChannelData(0),hop=512,win=1024;
+  const n=Math.max(1,Math.floor((ch.length-win)/hop));
+  const env=new Float32Array(n);
+  for(let i=0;i<n;i++){let s=0;const o=i*hop;for(let j=0;j<win;j+=4){const v=ch[o+j];s+=v*v}env[i]=Math.sqrt(s/(win/4))}
+  const flux=new Float32Array(n);
+  for(let i=1;i<n;i++)flux[i]=Math.max(0,env[i]-env[i-1]);
+  const fps=buf.sampleRate/hop;
+  const minLag=Math.max(2,Math.floor(fps*60/180)),maxLag=Math.min(n-2,Math.ceil(fps*60/60));
+  let best=minLag,bestV=-1;
+  for(let lag=minLag;lag<=maxLag;lag++){
+    let s=0;for(let i=0;i<n-lag;i++)s+=flux[i]*flux[i+lag];
+    if(s>bestV){bestV=s;best=lag}
+  }
+  const beatF=best,bpm=60*fps/beatF;
+  let ph=0,phV=-1;
+  for(let p=0;p<beatF;p++){let s=0;for(let i=p;i<n;i+=beatF)s+=flux[i];if(s>phV){phV=s;ph=p}}
+  return {env,flux,fps,beatF,bpm,phase:ph,n}
+}
+
+function simScore(env,a,b,w){
+  let sab=0,saa=0,sbb=0;
+  for(let i=-w;i<w;i++){
+    const x=env[a+i]||0,y=env[b+i]||0;
+    sab+=x*y;saa+=x*x;sbb+=y*y;
+  }
+  return sab/(Math.sqrt(saa*sbb)+1e-9)
+}
+
+function findJump(an,removeF){
+  const {env,beatF,phase,n}=an;
+  const w=Math.min(Math.round(beatF*6),Math.floor(n/8));
+  const margin=Math.round(n*0.08)+w;
+  let best=null;
+  for(let b1=phase;b1<n;b1+=beatF){
+    if(b1<margin)continue;
+    const ideal=b1+removeF;
+    const snapped=phase+Math.round((ideal-phase)/beatF)*beatF;
+    for(const b2 of [snapped,snapped-beatF,snapped+beatF]){
+      if(b2<=b1+beatF||b2>n-margin)continue;
+      const errF=Math.abs((b2-b1)-removeF);
+      if(errF>beatF*1.5)continue;
+      const s=simScore(env,b1,b2,w)-errF/(beatF*40);
+      if(!best||s>best.s)best={s,b1,b2};
+    }
+  }
+  return best
+}
+
+function process(buf,targetSec,opt){
+  opt=opt||{};
+  const an=buf._an||analyze(buf);
+  const sr=buf.sampleRate,D=buf.duration,T=targetSec;
+  const xf=Math.min(opt.xfade||1,T/4);
+  const hop=512;
+  if(T>D+0.5)throw new Error('Mode extend belum didukung di v1 — target ('+T+'s) lebih panjang dari lagu ('+D.toFixed(1)+'s). Pakai lagu yang lebih panjang dulu.');
+  if(D-T<=2.5){
+    const finalLen=Math.max(1,Math.floor(T*sr));
+    const outArrs=[];
+    for(let c=0;c<buf.numberOfChannels;c++){
+      const out=new Float32Array(finalLen);
+      out.set(buf.getChannelData(c).subarray(0,finalLen));
+      outArrs.push(out);
+    }
+    const fadeS=opt.fade?Math.min(Math.floor(1.5*sr),finalLen):0;
+    for(let c=0;c<outArrs.length;c++)for(let k=0;k<fadeS;k++)outArrs[c][finalLen-1-k]*=k/fadeS;
+    return {blob:encodeWav(outArrs,finalLen,sr),duration:finalLen/sr,mode:'trim',bpm:an.bpm,an,removedSec:D-T}
+  }
+  const removeF=Math.round((D-T)*sr/hop);
+  const jump=findJump(an,removeF);
+  if(!jump)throw new Error('Gak nemu titik potong yang aman — lagu kependekan relatif ke target, atau beat gak kedetect. Coba target lain.');
+  const t1=jump.b1*hop/sr,t2=jump.b2*hop/sr;
+  const a=Math.floor(t1*sr),b=Math.floor(t2*sr);
+  const x=Math.max(1,Math.min(Math.floor(xf*sr),a,b-a));
+  const outLenRaw=a+(buf.length-b);
+  const ch=buf.numberOfChannels;
+  const outArrs=[];
+  for(let c=0;c<ch;c++){
+    const src=buf.getChannelData(c);
+    const out=new Float32Array(outLenRaw);
+    const pre=Math.max(0,a-x);
+    out.set(src.subarray(0,pre),0);
+    for(let k=0;k<x;k++){
+      const g2=Math.sin(Math.PI/2*k/x),g1=Math.cos(Math.PI/2*k/x);
+      const i1=a-x+k,i2=b-x+k;
+      out[pre+k]=(src[i1]||0)*g1+(src[i2]||0)*g2;
+    }
+    out.set(src.subarray(b),a);
+    outArrs.push(out);
+  }
+  let finalLen=Math.min(outLenRaw,Math.ceil(T*sr));
+  const trimmed=outLenRaw-finalLen;
+  if(trimmed>sr*1.6) finalLen=outLenRaw;
+  const fadeS=opt.fade?Math.floor(1.5*sr):0;
+  for(let c=0;c<ch;c++){
+    if(fadeS>0)for(let k=0;k<fadeS&&k<finalLen;k++){
+      const i=finalLen-1-k;
+      outArrs[c][i]*=k/fadeS;
+    }
+  }
+  const blob=encodeWav(outArrs,finalLen,sr);
+  const shortBy=T-finalLen/sr;
+  return {blob,duration:finalLen/sr,t1,t2,bpm:an.bpm,an,removedSec:t2-t1,
+    warn:shortBy>0.35?('meleset '+shortBy.toFixed(1)+' dtk dari target (snap ke beat) — coba crossfade/target beda kalau kurang pas'):null}
+}
+
+function encodeWav(chans,len,rate){
+  const nc=chans.length,bps=2,ba=nc*bps;
+  const buf=new ArrayBuffer(44+len*ba),v=new DataView(buf);
+  const ws=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+  ws(0,'RIFF');v.setUint32(4,36+len*ba,true);ws(8,'WAVE');ws(12,'fmt ');
+  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,nc,true);
+  v.setUint32(24,rate,true);v.setUint32(28,rate*ba,true);v.setUint16(32,ba,true);v.setUint16(34,16,true);
+  ws(36,'data');v.setUint32(40,len*ba,true);
+  let o=44;
+  for(let i=0;i<len;i++)for(let c=0;c<nc;c++){
+    let s=Math.max(-1,Math.min(1,chans[c][i]||0));
+    v.setInt16(o,s<0?s*0x8000:s*0x7FFF,true);o+=2;
+  }
+  return new Blob([buf],{type:'audio/wav'})
+}
+
+function drawWave(env,cut){
+  const cv=$('wave');cv.style.display='block';
+  const g=cv.getContext('2d');g.clearRect(0,0,cv.width,cv.height);
+  let mx=0;for(let i=0;i<env.length;i++)if(env[i]>mx)mx=env[i];
+  g.fillStyle='#4f8ff7';
+  const step=env.length/cv.width;
+  for(let px=0;px<cv.width;px++){
+    const vv=(env[Math.floor(px*step)]||0)/(mx||1);
+    const h=Math.max(2,vv*cv.height*0.92);
+    g.fillRect(px,(cv.height-h)/2,1,h);
+  }
+  if(cut){
+    g.fillStyle='#e63d2f';
+    const p1=cut.b1/env.length*cv.width,p2=cut.b2/env.length*cv.width;
+    g.fillRect(p1-2,0,4,cv.height);g.fillRect(p2-2,0,4,cv.height);
+    g.fillStyle='rgba(230,61,47,.25)';g.fillRect(p1,0,p2-p1,cv.height);
+  }
+}
+
+async function run(){
+  if(!srcBuf)return;
+  err('');$('go').disabled=true;$('go').textContent='⏳ Analyzing beats…';
+  try{
+    await new Promise(r=>setTimeout(r,30));
+    const res=process(srcBuf,parseFloat($('target').value)||28,{xfade:parseFloat($('xfade').value),fade:$('fade').checked});
+    lastBlob=res.blob;cutInfo=res;
+    if(res.mode==='trim'){
+      drawWave(res.an.env,null);
+      $('meta').textContent='⏱ '+res.duration.toFixed(1)+' dtk · potongan kecil → trim ujung + fade (gak perlu jump)';
+    }else{
+      drawWave(res.an.env,{b1:res.t1*srcBuf.sampleRate/512,b2:res.t2*srcBuf.sampleRate/512});
+      $('meta').textContent='⏱ '+res.duration.toFixed(1)+' dtk · potong '+res.removedSec.toFixed(1)+' dtk di '+res.t1.toFixed(1)+'s → '+res.t2.toFixed(1)+'s (area merah)'+(res.warn?' · ⚠ '+res.warn:'');
+    }
+    if(playerUrl)URL.revokeObjectURL(playerUrl);
+    playerUrl=URL.createObjectURL(res.blob);
+    $('player').src=playerUrl;
+    $('out').style.display='block';
+    $('player').play().catch(()=>{});
+  }catch(e){err(e.message||String(e))}
+  finally{$('go').disabled=false;$('go').textContent='✂ Fit duration'}
+}
+function err(m){const e=$('err');e.textContent=m;e.style.display=m?'block':'none'}
+function dl(){if(!lastBlob)return;const a=document.createElement('a');const u=URL.createObjectURL(lastBlob);a.href=u;a.download=lastName+'.wav';a.click();setTimeout(()=>URL.revokeObjectURL(u),10000)}
+window.MF={analyze,process,encodeWav,findJump};
+</script>
+</body>
+</html>
