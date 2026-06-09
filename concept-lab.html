@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Concept Lab — Static Ad Mockups</title>
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Caveat:wght@700&family=Luckiest+Guy&family=Fredoka:wght@500;600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#1d2025;color:#e7eaee;font-family:'Nunito',sans-serif;padding:28px 18px 60px;max-width:1000px;margin:0 auto}
+  h1{font-size:22px;font-weight:900}
+  h1 span{color:#ffd23f}
+  .sub{color:#9aa3ad;font-size:13px;margin:4px 0 20px;line-height:1.5}
+  label{display:block;font-size:12px;font-weight:800;color:#9aa3ad;text-transform:uppercase;letter-spacing:.06em;margin:14px 0 6px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{background:#272b32;border:1.5px solid #3a4049;border-radius:20px;padding:7px 15px;font-size:13px;font-weight:800;cursor:pointer;color:#cdd6e0}
+  .chip.on{border-color:#4f8ff7;color:#fff;background:#2d3640}
+  .chip.draft::after{content:" ·draft";color:#e6a23c;font-size:10px}
+  .rules{margin-top:10px;font-size:12.5px;color:#e6a23c;font-weight:700;min-height:18px}
+  .bar{display:flex;gap:10px;align-items:center;margin-top:18px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:#e63d2f;color:#fff;border:none;border-radius:24px;font-family:'Nunito',sans-serif;font-weight:900;font-size:14px;padding:11px 24px;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.sec{background:#272b32;border:1.5px solid #3a4049;font-size:13px}
+  .grid{display:flex;flex-wrap:wrap;gap:18px;margin-top:22px;justify-content:center}
+  .slot{display:flex;flex-direction:column;gap:8px;align-items:center}
+  .tagline{font-size:11.5px;font-weight:900;color:#9aa3ad}
+  .card{position:relative;width:270px;height:480px;border-radius:10px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.45)}
+  .slotbtns{display:flex;gap:6px}
+  .mini{background:#272b32;border:1.5px solid #3a4049;border-radius:14px;color:#cdd6e0;font-family:'Nunito',sans-serif;font-weight:800;font-size:11.5px;padding:5px 12px;cursor:pointer}
+  .mini:hover{border-color:#4f8ff7}
+  .ph{position:absolute;inset:0;background:linear-gradient(160deg,#9fb98f,#5b7d4e);background-size:cover;background-position:center}
+  .doodle{position:absolute;font-size:22px;filter:drop-shadow(0 2px 3px #0006);z-index:6}
+  .cta{position:absolute;left:50%;transform:translateX(-50%);bottom:22px;font-weight:900;font-size:13px;padding:10px 22px;border-radius:22px;z-index:7;white-space:nowrap}
+  .chiplogo{position:absolute;top:12px;right:12px;border-radius:5px;padding:3px 8px;font-weight:900;font-size:9.5px;z-index:8;box-shadow:0 2px 5px #0004;background:#fff}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#2d3640;border:1.5px solid #4f8ff7;color:#fff;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:800;display:none;z-index:99}
+</style>
+</head>
+<body>
+  <h1>🧪 CONCEPT <span>LAB</span></h1>
+  <p class="sub">Mockup generator buat static ads — pilih brand + angle, shuffle layout & copy sampe nemu yang klik. Zero API, semua lokal. Foto bisa di-drop biar kebayang beneran. Brand bertanda <b style="color:#e6a23c">draft</b> = palette tebakan, kalibrasi pakai static asli.</p>
+
+  <label>Brand</label>
+  <div class="chips" id="brands"></div>
+  <div class="rules" id="rules"></div>
+
+  <div class="bar">
+    <div style="flex:1;min-width:180px">
+      <label style="margin-top:0">Angle</label>
+      <div class="chips" id="angles"></div>
+    </div>
+  </div>
+
+  <div class="bar">
+    <button class="btn" onclick="shuffleAll()">🎲 Shuffle semua</button>
+    <button class="btn sec" onclick="document.getElementById('photo').click()">🖼 Pakai foto (lokal)</button>
+    <input type="file" id="photo" accept="image/*" style="display:none">
+    <span style="font-size:12px;color:#7c8590" id="phName"></span>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <div class="toast" id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+let photoURL=null;
+
+const BRANDS={
+  kinderkare:{name:'Kinder Kare',draft:false,rules:'✅ faces OK · bg biru tekstur · marker + aksen kuning · CTA pill merah',
+    bg:'radial-gradient(120% 90% at 30% 8%,#3fb3df,#1f9ed4 50%,#1689c2)',headFont:"'Permanent Marker',cursive",headColor:'#fff',headShadow:'2px 2px 0 #0e6b9c',accent:'#ffd23f',ctaBg:'#e63d2f',ctaColor:'#fff',ctaBorder:'2px solid #fff',doodles:['🍓','⚡','✓'],chipHtml:'<span style="color:#1689c2">KINDER</span> <span style="color:#e63d2f">KARE</span>',blockColor:'#1f9ed4',caseUpper:true},
+  everwood:{name:'Everwood',draft:false,rules:'✅ faces OK · bg lime ribbed · headline chunky 2-tone · CTA pill teal',
+    bg:'repeating-linear-gradient(90deg,#b5cf45 0 14px,#aac63e 14px 28px)',headFont:"'Luckiest Guy',cursive",headColor:'#fff',headShadow:'2.5px 2.5px 0 #2c6e4f',accent:'#ffd23f',ctaBg:'#1d9e8f',ctaColor:'#fff',ctaBorder:'none',doodles:['✦','🌾','☺'],chipHtml:'<span style="color:#2c6e4f">EVERWOOD</span>',blockColor:'#aac63e',caseUpper:true},
+  kiros:{name:"Kiro's",draft:false,rules:'✅ faces OK · ungu vibrant playful · tema Peace of Mind / School Readiness',
+    bg:'radial-gradient(120% 90% at 30% 10%,#9b5de5,#7c3aed 55%,#6024c9)',headFont:"'Fredoka',sans-serif",headColor:'#fff',headShadow:'2px 2px 0 #4c1d95',accent:'#fbbf24',ctaBg:'#fff',ctaColor:'#6024c9',ctaBorder:'none',doodles:['✨','💜','☁️'],chipHtml:'<span style="color:#6024c9">KIRO\'S</span>',blockColor:'#7c3aed',caseUpper:false},
+  ingleburn:{name:'Ingleburn',draft:false,rules:'⛔ NO AI (foto real only) · ❌ no kids faces · tone PREMIUM + facility showcase',
+    bg:'linear-gradient(165deg,#f5f1e8,#e8e0d0)',headFont:"'Fredoka',sans-serif",headColor:'#2d3b2f',headShadow:'none',accent:'#b08d3e',ctaBg:'#2d3b2f',ctaColor:'#f5f1e8',ctaBorder:'none',doodles:['✦','·','✦'],chipHtml:'<span style="color:#2d3b2f">INGLEBURN <span style="color:#b08d3e">MONTESSORI</span></span>',blockColor:'#3c4f3e',caseUpper:false},
+  littlesmarties:{name:'Little Smarties',draft:true,rules:'❌ no kids faces · ❌ NO voiceover di video · foto real dari FB (per Max 5 Jun)',
+    bg:'radial-gradient(120% 90% at 30% 8%,#ff8a5c,#f4623a 55%,#e0481f)',headFont:"'Fredoka',sans-serif",headColor:'#fff',headShadow:'2px 2px 0 #9c2e0e',accent:'#ffe14d',ctaBg:'#1d6fd1',ctaColor:'#fff',ctaBorder:'2px solid #fff',doodles:['🧠','⭐','✓'],chipHtml:'<span style="color:#e0481f">LITTLE</span> <span style="color:#1d6fd1">SMARTIES</span>',blockColor:'#f4623a',caseUpper:true},
+  littlegems:{name:'Little Gems',draft:true,rules:'CTA = DRIVE CALLS (0424 165 122) · VO dari klien sendiri',
+    bg:'radial-gradient(120% 90% at 30% 8%,#3ec6b8,#199b90 55%,#0d7d74)',headFont:"'Fredoka',sans-serif",headColor:'#fff',headShadow:'2px 2px 0 #04443f',accent:'#ffd23f',ctaBg:'#7c3aed',ctaColor:'#fff',ctaBorder:'2px solid #fff',doodles:['💎','✨','✓'],chipHtml:'<span style="color:#0d7d74">LITTLE</span> <span style="color:#7c3aed">GEMS</span>',blockColor:'#199b90',caseUpper:true},
+  wonderworld:{name:'WonderWorld',draft:true,rules:'(belum ada rule khusus — cek Client Hub)',
+    bg:'radial-gradient(120% 90% at 30% 8%,#5aa9e6,#2f7fd4 55%,#1b62b5)',headFont:"'Fredoka',sans-serif",headColor:'#fff',headShadow:'2px 2px 0 #123c70',accent:'#ffd23f',ctaBg:'#ff7a3d',ctaColor:'#fff',ctaBorder:'2px solid #fff',doodles:['🌍','🎈','✦'],chipHtml:'<span style="color:#1b62b5">WONDER<span style="color:#ff7a3d">WORLD</span></span>',blockColor:'#2f7fd4',caseUpper:true},
+  kreationkidz:{name:'Kreation Kidz',draft:true,rules:'(belum ada rule khusus — cek Client Hub)',
+    bg:'radial-gradient(120% 90% at 30% 8%,#f973ab,#ec4899 55%,#d62f82)',headFont:"'Fredoka',sans-serif",headColor:'#fff',headShadow:'2px 2px 0 #8c1a52',accent:'#ffe14d',ctaBg:'#2563eb',ctaColor:'#fff',ctaBorder:'2px solid #fff',doodles:['🎨','✂️','⭐'],chipHtml:'<span style="color:#d62f82">KREATION</span> <span style="color:#2563eb">KIDZ</span>',blockColor:'#ec4899',caseUpper:true}
+};
+
+const ANGLES={
+  enrolment:{label:'Enrolment',copy:[
+    {h:'Enrolments now open',s:'Spaces are limited and filling for 2026 — we would love to show you around.'},
+    {h:'A place for your little one',s:'Now welcoming new families. Quality care close to home.'},
+    {h:'Limited spots available',s:'Small group sizes mean every child is truly known.'},
+    {h:'Your child\'s first big adventure',s:'Enrol today — CCS subsidies available for eligible families.'}],
+    cta:['Enrol today','Secure your spot','Enquire now']},
+  tour:{label:'Book a Tour',copy:[
+    {h:'Come see it for yourself',s:'A 20-minute visit tells you more than any website ever could.'},
+    {h:'See a real day, not a brochure',s:'Tours run weekdays — bring your little one along.'},
+    {h:'Walk through. Feel the difference.',s:'See the rooms, meet the team, ask anything.'},
+    {h:'Meet our educators',s:'We\'ll show you exactly where your child\'s day would happen.'}],
+    cta:['Book a tour','Arrange a visit','Pick a tour time']},
+  edu:{label:'Edukasi/Tips',copy:[
+    {h:'Green flags to look for',s:'Educators at eye level. Spaces set up for exploring. Calm, happy goodbyes.'},
+    {h:'What a great day looks like',s:'When little ones feel safe, they\'re free to learn.'},
+    {h:'Questions worth asking on a tour',s:'Knowing what to look for makes choosing so much easier.'},
+    {h:'How play becomes learning',s:'Real learning often looks a lot like play — and that\'s the point.'}],
+    cta:['Save this for your tour','See it in action','Learn more']},
+  program:{label:'Program/Readiness',copy:[
+    {h:'Ready for big school',s:'A play-based programme guided by qualified early-childhood educators.'},
+    {h:'Where curious minds grow',s:'We grow the skills that matter — sharing, listening, confidence.'},
+    {h:'Learning through play, every day',s:'Aligned with the Early Years Learning Framework.'},
+    {h:'Building big-school confidence',s:'School readiness built one curious moment at a time.'}],
+    cta:['Explore our programme','Book a tour','Enquire now']},
+  care:{label:'Care/Daily Life',copy:[
+    {h:'A day in the life',s:'Familiar faces, steady routines, and plenty of room to play.'},
+    {h:'Safe, settled, and happy',s:'Healthy meals, fresh air, and educators who notice the little things.'},
+    {h:'Where your child is truly known',s:'Low ratios so no one slips through the cracks.'},
+    {h:'Little routines, big comfort',s:'A calm, settled space where children feel at home.'}],
+    cta:['See a day with us','Book a tour','Meet our educators']},
+  belonging:{label:'Milestones',copy:[
+    {h:'Big moments start small',s:'First steps, first friends, first "I did it!"'},
+    {h:'Where every child belongs',s:'Every child is seen, heard, and valued here.'},
+    {h:'First friends, lasting confidence',s:'Friendships, confidence, and the joy of figuring it out.'},
+    {h:'Celebrating every little win',s:'Because belonging is where great learning begins.'}],
+    cta:['Become part of our community','Book a tour','Enquire today']}
+};
+
+const LAYOUTS=['fullbleed','arch','diagonal','colorblock','sticker','torn','polaroid'];
+let curBrand='kinderkare',curAngle='tour',slots=[{},{},{}];
+
+function accentify(h,t){
+  const ws=h.split(' ');
+  let idx=0,len=0;
+  ws.forEach((w,i)=>{if(w.length>len){len=w.length;idx=i}});
+  return ws.map((w,i)=>i===idx?'<em style="color:'+t.accent+';font-style:normal">'+w+'</em>':w).join(' ');
+}
+function headHtml(t,h,size){
+  const txt=t.caseUpper?h.toUpperCase():h;
+  return '<div style="font-family:'+t.headFont+';color:'+t.headColor+';text-shadow:'+t.headShadow+';font-size:'+size+'px;line-height:1.12;position:relative;z-index:5">'+accentify(txt,t)+'</div>';
+}
+function subHtml(t,s,dark){
+  return '<div style="font-family:\'Caveat\',cursive;font-weight:700;color:'+(dark||'#fff')+';font-size:16.5px;line-height:1.25;margin-top:8px;position:relative;z-index:5;opacity:.95">'+s+'</div>';
+}
+function ctaHtml(t,c){return '<div class="cta" style="background:'+t.ctaBg+';color:'+t.ctaColor+';border:'+t.ctaBorder+'">'+c+'</div>'}
+function chipHtml(t){return '<div class="chiplogo">'+t.chipHtml+'</div>'}
+function doodles(t,p1,p2){return '<span class="doodle" style="'+p1+'">'+t.doodles[0]+'</span><span class="doodle" style="'+p2+'">'+t.doodles[1]+'</span>'}
+function phStyle(){return photoURL?'background-image:url('+photoURL+')':''}
+
+const RENDER={
+  fullbleed:(t,c)=>'<div class="ph" style="'+phStyle()+'"></div><div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 38%,rgba(0,0,0,.72));z-index:2"></div>'+chipHtml(t)+doodles(t,'top:16px;left:14px','bottom:88px;right:16px')+'<div style="position:absolute;left:18px;right:18px;bottom:70px;z-index:5">'+headHtml(t,c.h,26)+subHtml(t,c.s)+'</div>'+ctaHtml(t,c.cta),
+  arch:(t,c)=>'<div style="position:absolute;inset:0;background:'+t.bg+'"></div>'+chipHtml(t)+doodles(t,'top:18px;left:16px','top:46%;right:14px')+'<div style="position:absolute;top:54px;left:35px;right:35px;height:240px;border-radius:110px 110px 14px 14px;overflow:hidden;border:5px solid #fff;box-shadow:0 8px 20px #0005;z-index:4"><div class="ph" style="'+phStyle()+'"></div></div><div style="position:absolute;left:18px;right:18px;top:312px;text-align:center;z-index:5">'+headHtml(t,c.h,22)+subHtml(t,c.s)+'</div>'+ctaHtml(t,c.cta),
+  diagonal:(t,c)=>'<div style="position:absolute;inset:0;background:'+t.bg+'"></div><div style="position:absolute;inset:0;clip-path:polygon(0 0,100% 0,100% 46%,0 60%);overflow:hidden;z-index:3"><div class="ph" style="'+phStyle()+'"></div></div>'+chipHtml(t)+doodles(t,'top:52%;left:14px','bottom:92px;right:16px')+'<div style="position:absolute;left:18px;right:18px;bottom:78px;z-index:5">'+headHtml(t,c.h,24)+subHtml(t,c.s)+'</div>'+ctaHtml(t,c.cta),
+  colorblock:(t,c)=>'<div style="position:absolute;inset:0;background:'+t.bg+'"></div><div style="position:absolute;left:0;right:0;bottom:0;height:52%;overflow:hidden;z-index:3"><div class="ph" style="'+phStyle()+'"></div></div>'+chipHtml(t)+doodles(t,'top:40%;left:14px','top:14px;left:16px')+'<div style="position:absolute;left:18px;right:18px;top:46px;z-index:5">'+headHtml(t,c.h,24)+subHtml(t,c.s)+'</div>'+ctaHtml(t,c.cta),
+  sticker:(t,c)=>'<div style="position:absolute;inset:0;background:'+t.bg+'"></div>'+chipHtml(t)+doodles(t,'top:20px;left:16px','bottom:120px;left:18px')+'<span class="doodle" style="top:60px;right:20px">'+(t.doodles[2]||'✦')+'</span><div style="position:absolute;top:84px;left:50%;transform:translateX(-50%) rotate(-3deg);width:190px;height:190px;border-radius:50%;overflow:hidden;border:6px solid #fff;box-shadow:0 10px 22px #0005;z-index:4"><div class="ph" style="'+phStyle()+'"></div></div><div style="position:absolute;left:16px;right:16px;top:296px;text-align:center;z-index:5">'+headHtml(t,c.h,22)+subHtml(t,c.s)+'</div>'+ctaHtml(t,c.cta),
+  torn:(t,c)=>'<div style="position:absolute;inset:0;background:'+t.bg+'"></div>'+chipHtml(t)+'<div style="position:absolute;left:18px;right:18px;top:44px;z-index:5">'+headHtml(t,c.h,23)+'</div><div style="position:absolute;left:0;right:0;top:170px;height:175px;overflow:hidden;clip-path:polygon(0 6%,7% 0,17% 5%,28% 1%,40% 6%,52% 1%,63% 5%,75% 0,86% 5%,95% 1%,100% 6%,100% 94%,93% 100%,82% 95%,70% 99%,58% 94%,47% 99%,35% 95%,24% 100%,12% 95%,0 99%);z-index:4"><div class="ph" style="'+phStyle()+'"></div></div>'+doodles(t,'top:150px;right:14px','bottom:96px;left:16px')+'<div style="position:absolute;left:18px;right:18px;top:360px;z-index:5">'+subHtml(t,c.s)+'</div>'+ctaHtml(t,c.cta),
+  polaroid:(t,c)=>'<div style="position:absolute;inset:0;background:'+t.bg+'"></div>'+chipHtml(t)+doodles(t,'top:18px;left:16px','bottom:100px;right:14px')+'<div style="position:absolute;top:64px;left:50%;transform:translateX(-50%) rotate(-2.5deg);width:200px;background:#fff;padding:9px 9px 30px;box-shadow:0 10px 22px #0005;z-index:4"><div style="height:200px;overflow:hidden"><div class="ph" style="position:relative;height:100%;'+phStyle()+'"></div></div></div><div style="position:absolute;left:16px;right:16px;top:330px;text-align:center;z-index:5">'+headHtml(t,c.h,21)+subHtml(t,c.s)+'</div>'+ctaHtml(t,c.cta)
+};
+
+function pick(arr,not){let v;do{v=arr[Math.floor(Math.random()*arr.length)]}while(arr.length>1&&v===not);return v}
+
+function rollSlot(i){
+  const t=BRANDS[curBrand],ang=ANGLES[curAngle];
+  const others=slots.filter((s,j)=>j!==i);
+  let layout;do{layout=pick(LAYOUTS)}while(others.some(o=>o.layout===layout));
+  const copy=pick(ang.copy,slots[i].copy);
+  slots[i]={layout,copy,cta:pick(ang.cta)};
+}
+function render(){
+  const t=BRANDS[curBrand];
+  $('rules').textContent=t.rules+(t.draft?'  ·  ⚠ palette DRAFT — kalibrasi pakai static asli':'');
+  $('grid').innerHTML=slots.map((s,i)=>{
+    if(!s.copy)return '';
+    const c={h:s.copy.h,s:s.copy.s,cta:s.cta};
+    return '<div class="slot"><div class="tagline">'+s.layout.toUpperCase()+'</div><div class="card">'+RENDER[s.layout](t,c)+'</div><div class="slotbtns"><button class="mini" onclick="reroll('+i+')">🎲 ulang</button><button class="mini" onclick="copySpec('+i+')">📋 copy spec</button></div></div>';
+  }).join('');
+}
+function reroll(i){rollSlot(i);render()}
+function shuffleAll(){slots=[{},{},{}];for(let i=0;i<3;i++)rollSlot(i);render()}
+function copySpec(i){
+  const s=slots[i],t=BRANDS[curBrand];
+  const txt='BRAND: '+t.name+'\nLAYOUT: '+s.layout+'\nHEADLINE: '+s.copy.h+'\nSUB: '+s.copy.s+'\nCTA: '+s.cta+'\nRULES: '+t.rules;
+  navigator.clipboard.writeText(txt).then(()=>{const o=$('toast');o.textContent='✓ Spec ke-copy — paste di PS/AI';o.style.display='block';setTimeout(()=>o.style.display='none',1800)});
+}
+$('photo').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  if(photoURL)URL.revokeObjectURL(photoURL);
+  photoURL=URL.createObjectURL(f);
+  $('phName').textContent='🖼 '+f.name;
+  render();e.target.value='';
+});
+
+$('brands').innerHTML=Object.keys(BRANDS).map(k=>'<span class="chip'+(BRANDS[k].draft?' draft':'')+'" id="b_'+k+'" onclick="setBrand(\''+k+'\')">'+BRANDS[k].name+'</span>').join('');
+$('angles').innerHTML=Object.keys(ANGLES).map(k=>'<span class="chip" id="a_'+k+'" onclick="setAngle(\''+k+'\')">'+ANGLES[k].label+'</span>').join('');
+function setBrand(k){curBrand=k;document.querySelectorAll('[id^=b_]').forEach(e=>e.classList.toggle('on',e.id==='b_'+k));render()}
+function setAngle(k){curAngle=k;document.querySelectorAll('[id^=a_]').forEach(e=>e.classList.toggle('on',e.id==='a_'+k));shuffleAll()}
+setBrand('kinderkare');setAngle('tour');
+</script>
+</body>
+</html>
