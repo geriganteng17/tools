@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Lab — Gemini Image Prompts</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#1d2025;color:#e7eaee;font-family:'Nunito',sans-serif;padding:28px 18px 60px;max-width:880px;margin:0 auto}
+  h1{font-size:22px;font-weight:900}
+  h1 span{color:#ffd23f}
+  .sub{color:#9aa3ad;font-size:13px;margin:4px 0 18px;line-height:1.5}
+  label{display:block;font-size:12px;font-weight:800;color:#9aa3ad;text-transform:uppercase;letter-spacing:.06em;margin:14px 0 6px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{background:#272b32;border:1.5px solid #3a4049;border-radius:20px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;color:#cdd6e0}
+  .chip.on{border-color:#4f8ff7;color:#fff;background:#2d3640}
+  .chip.warn{border-color:#a3403c;color:#f3b8b3}
+  .rules{margin-top:8px;font-size:12.5px;color:#e6a23c;font-weight:700;min-height:16px}
+  textarea,select,input{width:100%;background:#272b32;border:1.5px solid #3a4049;border-radius:10px;color:#e7eaee;font-family:'Nunito',sans-serif;font-size:14px;padding:10px 13px;outline:none}
+  textarea:focus,select:focus{border-color:#4f8ff7}
+  textarea{min-height:64px;line-height:1.5;resize:vertical}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .row>div{flex:1;min-width:150px}
+  .tog{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#cdd6e0;cursor:pointer;margin-top:8px}
+  .tog input{width:auto}
+  .out{margin-top:20px;background:#23272e;border:1.5px solid #3a4049;border-radius:12px;padding:16px}
+  .out pre{white-space:pre-wrap;font-family:'Nunito',sans-serif;font-size:14.5px;line-height:1.6;color:#e7eaee;min-height:80px}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:#e63d2f;color:#fff;border:none;border-radius:24px;font-family:'Nunito',sans-serif;font-weight:900;font-size:14px;padding:11px 24px;cursor:pointer;margin-top:12px}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.sec{background:#272b32;border:1.5px solid #3a4049;font-size:13px}
+  .iter{margin-top:18px}
+  .iter .chip{font-size:12px}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#2d3640;border:1.5px solid #4f8ff7;color:#fff;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:800;display:none;z-index:99}
+</style>
+</head>
+<body>
+  <h1>✨ PROMPT <span>LAB</span></h1>
+  <p class="sub">Prompt builder buat <b>Gemini / Nano Banana</b> — dari template yang biasa Bolo pakai, plus auto-enhance (angle interpretation, natural commercial look, no-faces via angle). Compose → copy → paste ke Gemini.</p>
+
+  <label>Mode</label>
+  <div class="chips" id="modes"></div>
+
+  <label>Klien</label>
+  <div class="chips" id="clients"></div>
+  <div class="rules" id="rules"></div>
+
+  <label>Deskripsi subjek / scene / perubahan</label>
+  <textarea id="desc" placeholder="mis: anak main tuff tray isi gandum di kelas, suasana montessori, warna hangat — atau buat subject swap: 'educator seragam biru di foto 1 diganti educator dari foto 2'"></textarea>
+
+  <div class="row">
+    <div><label>Format</label><select id="fmt"><option value="9x16" selected>9x16 — reel/story/i2v</option><option value="16x9">16x9 — horizontal</option><option value="1x1">1x1 — feed</option><option value="4x3">4x3</option></select></div>
+    <div><label>Shot</label><select id="shot"><option value="medium shot" selected>Medium shot (default)</option><option value="close-up shot">Close-up</option><option value="wide shot">Wide</option><option value="overhead flat-lay shot">Overhead / flat-lay</option><option value="">— tanpa shot type —</option></select></div>
+    <div><label>Headspace (buat teks)</label><select id="head"><option value="" selected>Gak perlu</option><option value="atas">Atas</option><option value="bawah">Bawah</option><option value="kiri">Kiri</option><option value="kanan">Kanan</option></select></div>
+  </div>
+
+  <div class="row">
+    <div><label>Bahasa prompt</label><select id="lang"><option value="id" selected>Indonesia (casual — biasa dipakai)</option><option value="en">English</option></select></div>
+    <div><label>Angle no-faces (kalau aktif)</label><select id="angle"><option value="behind" selected>Dari belakang / agak atas</option><option value="side">Dari samping (profil, nunduk)</option><option value="overhead">Overhead (wajah ke bawah)</option><option value="hands">Fokus tangan/material (crop)</option><option value="widebehind">Wide dari belakang (suasana)</option></select></div>
+  </div>
+
+  <label style="margin-top:16px">Enhance</label>
+  <label class="tog"><input type="checkbox" id="t_angle" checked> Angle interpretation — jangan saklek ikut referensi (rule wajib Bolo)</label>
+  <label class="tog"><input type="checkbox" id="t_natural" checked> Natural & commercial look, less stock-photo</label>
+  <label class="tog"><input type="checkbox" id="t_sharp"> 8k resolution, sharp, high detail (kalau hasil blur)</label>
+  <label class="tog"><input type="checkbox" id="t_age" checked> Anak umur 3–5 tahun (standar childcare ads)</label>
+  <label class="tog"><input type="checkbox" id="t_faces"> 🚫 NO faces — sembunyikan wajah via angle (auto-ON utk klien no-faces)</label>
+
+  <div class="out">
+    <label style="margin-top:0">Prompt jadi <span id="cc" style="text-transform:none;color:#7c8590"></span></label>
+    <pre id="prompt"></pre>
+    <button class="btn" onclick="copyPrompt()">📋 Copy prompt</button>
+    <a class="btn sec" href="https://gemini.google.com" target="_blank" style="text-decoration:none">↗ Buka Gemini</a>
+  </div>
+
+  <div class="iter">
+    <label>Iterasi cepat (klik = copy)</label>
+    <div class="chips">
+      <span class="chip" onclick="copyText('generate lagi gambar ini')">🎲 Angle lain</span>
+      <span class="chip" onclick="copyText('add depth of field untuk gambar ini biar subjek lebih fokus')">🌫 Blur background</span>
+      <span class="chip" onclick="copyText('ubah angle agar wajah anak tidak terlihat, formatnya tetap sama')">🚫 Wajah masih keliatan</span>
+      <span class="chip" onclick="copyText('tambah ruang kosong di atas untuk teks overlay, subjek geser ke bawah sedikit, format tetap sama')">⬆ Kurang headspace</span>
+      <span class="chip" onclick="copyText('make it look more natural and authentic, less stock photo')">📷 Terlalu stock-photo</span>
+      <span class="chip" onclick="copyText('8k resolution, sharp, high detail')">🔍 Hasil blur</span>
+      <span class="chip" onclick="copyText('hilangkan [elemen] dari gambar, format tetap sama')">✂ Hilangkan elemen</span>
+      <span class="chip" onclick="copyText('make this format 9x16')">📐 Ganti format 9x16</span>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const MODES={
+  ref:{label:'Dari referensi (upload foto)'},
+  swap:{label:'Subject swap (2 foto)'},
+  scratch:{label:'From scratch (cinematic)'},
+  bg:{label:'Background gen'},
+  enhance:{label:'Casual → profesional'},
+  fmt:{label:'Ganti format aja'}
+};
+const CLIENTS={
+  none:{name:'— Umum —',faces:true,note:''},
+  kinderkare:{name:'Kinder Kare',faces:true,note:'✅ faces OK'},
+  everwood:{name:'Everwood',faces:true,note:'✅ faces OK'},
+  kiros:{name:"Kiro's",faces:true,note:'✅ faces OK'},
+  wonderworld:{name:'WonderWorld',faces:true,note:'✅ faces keliatan OK di static'},
+  littlesmarties:{name:'Little Smarties',faces:false,note:'❌ NO faces — auto-ON · foto real FB lebih disukai (per Max 5 Jun, no AI footage utk video!)'},
+  littlegems:{name:'Little Gems',faces:false,note:'❌ no faces (dipegang Binh)'},
+  ingleburn:{name:'Ingleburn',faces:false,note:'⛔ STOP — NO AI SAMA SEKALI buat Ingleburn (interim). Pakai foto real. Prompt ini jangan dipakai!',noai:true}
+};
+const ANGLES={
+  behind:{id:'jangan perlihatkan wajah anak kecil — ambil dari belakang atau agak atas, tampilkan punggung, tangan, dan aktivitasnya',en:'do not show the children\'s faces — shoot from behind or slightly above, showing their backs, hands and the activity'},
+  side:{id:'jangan perlihatkan wajah anak — ambil dari samping, profil dengan wajah menunduk fokus ke aktivitas',en:'do not show the children\'s faces — side angle, profile with face looking down at the activity'},
+  overhead:{id:'ambil overhead dari atas — semua wajah menghadap ke bawah ke aktivitas, wajah tidak terlihat',en:'overhead top-down angle — all faces looking down at the activity, no faces visible'},
+  hands:{id:'fokus ke tangan dan material aja — tight crop, wajah di luar frame',en:'focus on hands and materials only — tight crop, faces outside the frame'},
+  widebehind:{id:'wide shot dari belakang — tampilkan suasana ruangan, semua anak terlihat dari belakang',en:'wide shot from behind — show the whole room atmosphere, all children seen from behind'}
+};
+let curMode='ref',curClient='none';
+
+$('modes').innerHTML=Object.keys(MODES).map(k=>'<span class="chip" id="m_'+k+'" onclick="setMode(\''+k+'\')">'+MODES[k].label+'</span>').join('');
+$('clients').innerHTML=Object.keys(CLIENTS).map(k=>'<span class="chip'+(CLIENTS[k].noai?' warn':'')+'" id="c_'+k+'" onclick="setClient(\''+k+'\')">'+CLIENTS[k].name+'</span>').join('');
+
+function setMode(k){curMode=k;document.querySelectorAll('[id^=m_]').forEach(e=>e.classList.toggle('on',e.id==='m_'+k));compose()}
+function setClient(k){
+  curClient=k;const c=CLIENTS[k];
+  document.querySelectorAll('[id^=c_]').forEach(e=>e.classList.toggle('on',e.id==='c_'+k));
+  $('rules').textContent=c.note;
+  if(!c.faces){$('t_faces').checked=true}
+  compose();
+}
+function hs(pos,lang){
+  if(!pos)return '';
+  const en={'atas':'top','bawah':'bottom','kiri':'left','kanan':'right'}[pos];
+  return lang==='id'?('beri ruang kosong di '+pos+' untuk teks overlay\n'):('leave empty space at the '+en+' of the frame for text overlay\n');
+}
+function compose(){
+  const c=CLIENTS[curClient],lang=$('lang').value,d=$('desc').value.trim();
+  const fmt=$('fmt').value,shot=$('shot').value,head=$('head').value;
+  const noFaces=$('t_faces').checked,ang=ANGLES[$('angle').value][lang==='id'?'id':'en'];
+  let p='';
+  if(c.noai){
+    $('prompt').textContent='⛔ Ingleburn = NO AI (aturan interim). Jangan generate AI buat klien ini — pakai foto/footage real dari GDrive/FB mereka.';$('cc').textContent='';return;
+  }
+  if(curMode==='ref'){
+    p=(lang==='id'?'buat foto profesional dari referensi ini':'Make a professional photo based on this reference image')+'\n';
+    if(d)p+=d+'\n';
+    p+=(lang==='id'?'ambil angle lain yang lebih masuk komposisinya\n':'choose a better angle for the composition\n');
+    if(noFaces)p+=ang+'\n';
+    if($('t_angle').checked)p+=(lang==='id'?'jangan terlalu saklek dengan anglenya, buat natural dan commercial look\n':'adjust the angle based on your interpretation, don\'t directly copy the reference pose — natural and commercial look\n');
+  }else if(curMode==='swap'){
+    p='Make a professional photo based on these images\n\n';
+    p+=(d||'I want to change the subject in the first image using the subject from the second image')+'\n\n';
+    if($('t_angle').checked)p+='adjust the angle based on your interpretation dont directly use the pose from the reference\n';
+    if(noFaces)p+=ANGLES[$('angle').value].en+'\n';
+  }else if(curMode==='scratch'){
+    p='A professional, cinematic '+(shot||'medium shot')+' of '+(d||'[describe subject]')+'. ';
+    p+='Warm, natural daylight, soft and inviting atmosphere. High-end commercial photography style, shallow depth of field';
+    if($('t_sharp').checked)p+=', 8k resolution, sharp, high detail';
+    p+='.\n';
+    if(noFaces)p+=ANGLES[$('angle').value].en+'\n';
+  }else if(curMode==='bg'){
+    p=(lang==='id'?'buat background ':'Generate a background of ')+(d||(lang==='id'?'[deskripsi ruangan]':'[room description]'))+'\n';
+    p+=(lang==='id'?'tanpa orang, pencahayaan alami, suasana warm dan inviting\n':'no people, natural lighting, warm and inviting atmosphere\n');
+  }else if(curMode==='enhance'){
+    p=(lang==='id'?'ubah foto ini menjadi foto profesional untuk iklan — perbaiki lighting jadi warm natural, komposisi lebih rapi':'Turn this photo into a professional ad-ready photo — fix the lighting to warm natural, cleaner composition')+'\n';
+    if(d)p+=d+'\n';
+    if(noFaces)p+=ang+'\n';
+    if($('t_angle').checked)p+=(lang==='id'?'boleh ubah angle biar lebih natural dan commercial\n':'you may change the angle for a more natural, commercial look\n');
+  }else if(curMode==='fmt'){
+    p='make this format '+fmt+'\n';
+    $('prompt').textContent=p.trim();$('cc').textContent='('+p.trim().length+' chars)';return;
+  }
+  if($('t_age').checked&&curMode!=='bg')p+=(lang==='id'?'anak terlihat umur 3-5 tahun\n':'children should look 3-5 years old\n');
+  if($('t_natural').checked&&curMode!=='scratch')p+=(lang==='id'?'natural dan authentic, jangan terlalu stock photo\n':'natural and authentic, less stock photo\n');
+  if($('t_sharp').checked&&curMode!=='scratch')p+='8k resolution, sharp, high detail\n';
+  p+=hs(head,lang);
+  p+='format '+fmt+'\n';
+  if(shot&&curMode!=='scratch')p+=shot;
+  $('prompt').textContent=p.trim();
+  $('cc').textContent='('+p.trim().length+' chars)';
+}
+function copyPrompt(){copyText($('prompt').textContent)}
+function copyText(t){navigator.clipboard.writeText(t).then(()=>{const o=$('toast');o.textContent='✓ Ke-copy — paste di Gemini';o.style.display='block';setTimeout(()=>o.style.display='none',1600)})}
+['desc','fmt','shot','head','lang','angle'].forEach(id=>$(id).addEventListener('input',compose));
+['t_angle','t_natural','t_sharp','t_age','t_faces'].forEach(id=>$(id).addEventListener('change',compose));
+setMode('ref');setClient('none');
+</script>
+</body>
+</html>
