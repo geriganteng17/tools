@@ -104,7 +104,7 @@ const CLIENTS={
   everwood:{name:'Everwood',faces:true,note:'✅ faces OK'},
   kiros:{name:"Kiro's",faces:true,note:'✅ faces OK'},
   wonderworld:{name:'WonderWorld',faces:true,note:'✅ faces keliatan OK di static'},
-  littlesmarties:{name:'Little Smarties',faces:false,note:'❌ NO faces — auto-ON · foto real FB lebih disukai (per Max 5 Jun, no AI footage utk video!)'},
+  littlesmarties:{name:'Little Smarties',faces:false,note:'⛔ STOP — Master Doc Max (Jun 2026): NO AI imagery buat Little Smarties juga! Pakai foto real FB/GDrive. Prompt ini jangan dipakai!',noai:true},
   littlegems:{name:'Little Gems',faces:false,note:'❌ no faces (dipegang Binh)'},
   ingleburn:{name:'Ingleburn',faces:false,note:'⛔ STOP — NO AI SAMA SEKALI buat Ingleburn (interim). Pakai foto real. Prompt ini jangan dipakai!',noai:true}
 };
@@ -139,7 +139,7 @@ function compose(){
   const noFaces=$('t_faces').checked,ang=ANGLES[$('angle').value][lang==='id'?'id':'en'];
   let p='';
   if(c.noai){
-    $('prompt').textContent='⛔ Ingleburn = NO AI (aturan interim). Jangan generate AI buat klien ini — pakai foto/footage real dari GDrive/FB mereka.';$('cc').textContent='';return;
+    $('prompt').textContent='⛔ '+c.name+' = NO AI imagery (Master Doc Max). Jangan generate AI buat klien ini — pakai foto/footage real dari GDrive/FB mereka.';$('cc').textContent='';return;
   }
   if(curMode==='ref'){
     p=(lang==='id'?'buat foto profesional dari referensi ini':'Make a professional photo based on this reference image')+'\n';
